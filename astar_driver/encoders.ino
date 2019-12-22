@@ -1,8 +1,8 @@
 
 #define M1_INT_1 14
 #define M1_INT_2 15
-#define M2_INT_1 16
-#define M2_INT_2 17
+#define M2_INT_1 17
+#define M2_INT_2 16
 
 static volatile long M1_counts = 0;
 static volatile long M2_counts = 0;
