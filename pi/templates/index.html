@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'>
+    <link rel="stylesheet" media="all" href="static/main.css">
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="static/script.js?1"></script>
+
+    <title>Raspberry Pi Robot Control Panel</title>
+  </head>
+
+  <body onload="init();">
+
+    <div id="container">
+
+      <h1>Raspberry Pi Robot Control Panel</h1>
+
+      <p><a href="/halt" onClick="return shutdown()">Shutdown...</a></p>
+      
+      <p>
+	LED
+	<input type="checkbox" id="led" onchange="setLed()">
+      </p>
+	
+      <p>
+	<input type="text" id="notes" maxlength="14" value="l16ceg>c">
+	<button onclick="playNotes()">Play</button>
+      </p>
+
+      <table>
+	<tr><th>Battery</th><td class="wide"><span id="battery_millivolts"></span> mV</td></tr>
+      </table>
+
+      <table>
+	<tr>
+	  <th rowspan=2>Encoders</th>
+	  <td id="encoders0"></td><td id="encoders1"></td>
+	</tr>
+      </table>
+
+      <div id="joystick">
+      </div>
+
+    </div>
+
+</html>
