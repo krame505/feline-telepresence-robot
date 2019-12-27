@@ -17,6 +17,8 @@ struct Data {
   
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
+
+  uint8_t cameraPan, cameraTilt;
 };
     """, packed=True)
     self._fields = dict(self._ffi.typeof("struct Data").fields)

@@ -22,9 +22,11 @@ def hello():
 def status():
     battery_millivolts = a_star.batteryMillivolts
     encoders = a_star.leftEncoder, a_star.rightEncoder
+    camera = a_star.cameraPan, a_star.cameraTilt
     data = {
         "battery_millivolts": battery_millivolts,
-        "encoders": encoders
+        "encoders": encoders,
+        "camera": camera
     }
     return json.dumps(data)
 
@@ -32,6 +34,12 @@ def status():
 def motors(left, right):
     a_star.leftMotor = int(left)
     a_star.rightMotor = int(right)
+    return ""
+
+@app.route("/camera/<pan>,<tilt>")
+def camera(pan, tilt):
+    a_star.cameraPan = max(int(pan), 0)
+    a_star.cameraTilt = max(int(tilt), 0)
     return ""
 
 @app.route("/led/<int:led>")
