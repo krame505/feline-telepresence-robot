@@ -15,6 +15,7 @@ struct __attribute__((packed)) Data {
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
 
+  bool servoCommand;
   uint8_t cameraPan, cameraTilt;
 };
 
@@ -22,21 +23,12 @@ PololuRPiSlave<struct Data, 5> slave;
 PololuBuzzer buzzer;
 AStar32U4Motors motors;
 
-#define MIN_PAN 40
-#define MAX_PAN 180
-
-#define CAMERA_PAN 5
-#define CAMERA_TILT 7
-Servo cameraPanServo, cameraTiltServo;
-
 void setup() {
   Serial.begin(115200);
   setup_encoders();
 
   motors.flipM2(true);
 
-  cameraPanServo.attach(CAMERA_PAN);
-  cameraTiltServo.attach(CAMERA_TILT);
   
   // Set up the slave at I2C address 20.
   slave.init(20);
@@ -76,11 +68,10 @@ void loop() {
 
   slave.buffer.leftEncoder = getM1Counts();
   slave.buffer.rightEncoder = getM2Counts();
-
-  slave.buffer.cameraPan = min(max(slave.buffer.cameraPan, MIN_PAN), MAX_PAN);
-  slave.buffer.cameraTilt = min(slave.buffer.cameraTilt, 180);
-  cameraPanServo.write(slave.buffer.cameraPan);
-  cameraTiltServo.write(slave.buffer.cameraTilt);
+  
+  handleServos(slave.buffer.servoCommand);
+  cameraPan(slave.buffer.cameraPan);
+  cameraTilt(slave.buffer.cameraTilt);
 
   // When done WRITING, call finalizeWrites() to make modified
   // data available to I2C master.

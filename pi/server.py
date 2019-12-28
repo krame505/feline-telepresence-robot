@@ -38,9 +38,8 @@ def motors(left, right):
 
 @app.route("/camera/<pan>,<tilt>")
 def camera(pan, tilt):
-    a_star.cameraPan = max(int(pan), 0)
-    a_star.cameraTilt = max(int(tilt), 0)
-    return ""
+    a_star.camera(int(pan), int(tilt))
+    return json.dumps((a_star.cameraPan, a_star.cameraTilt))
 
 @app.route("/led/<int:led>")
 def leds(led):

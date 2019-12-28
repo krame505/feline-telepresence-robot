@@ -18,6 +18,7 @@ struct Data {
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
 
+  bool servoCommand;
   uint8_t cameraPan, cameraTilt;
 };
     """, packed=True)
@@ -71,3 +72,8 @@ struct Data {
   def play_notes(self, notes):
     self.notes = bytes(notes, encoding='ASCII')
     self.playNotes = True
+  
+  def camera(self, pan, tilt):
+    self.servoCommand = True
+    self.cameraPan = min(max(pan, 0), 255)
+    self.cameraTilt = min(max(tilt, 0), 255)

@@ -1,10 +1,11 @@
 // Copyright Pololu Corporation.  For more information, see https://www.pololu.com/
-stop_motors = true
-block_set_motors = false
-mouse_dragging = false
+var stop_motors = true
+var block_set_motors = false
+var block_set_camera = false
+var mouse_dragging = false
 
-camera_pan = 0
-camera_tilt = 0
+var camera_pan = 0
+var camera_tilt = 0
 
 function init() {
     poll()
@@ -14,7 +15,7 @@ function init() {
     $("#joystick").bind("mousedown",mousedown)
     $(document).bind("mousemove",mousemove)
     $(document).bind("mouseup",mouseup)
-    $(document).keydown(function(e) {
+    $(document).keydown(function (e) {
 	switch (e.which) {
         case 37: // left
 	    cameraLeft()
@@ -126,11 +127,9 @@ function setMotors(left, right) {
     if (block_set_motors) return
     block_set_motors = true
 
-    $.ajax({url: "motors/" + left + "," + right}).done(setMotorsDone)
-}
-
-function setMotorsDone() {
-    block_set_motors = false
+    $.ajax({url: "motors/" + left + "," + right}).done(function () {
+	block_set_motors = false
+    })
 }
 
 function cameraUp() {
@@ -150,7 +149,16 @@ function cameraRight() {
 }
 
 function setCamera(pan, tilt) {
-    $.ajax({url: "camera/" + pan + "," + tilt})
+    if (block_set_camera) return
+    block_set_camera = true
+    
+    $.ajax({url: "camera/" + pan + "," + tilt}).done(function (json) {
+	c = JSON.parse(json)
+	camera_pan = c[0]
+	camera_tilt = c[1]
+	$("#camera").html("Camera: " + camera_pan + " " + camera_tilt)
+	block_set_camera = false
+    })
 }
 
 function setLed() {
