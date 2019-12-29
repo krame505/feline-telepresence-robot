@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
-from flask import Flask
-from flask import render_template
-from flask import redirect
-from subprocess import call
+import json
+import subprocess
+
+from flask import Flask, render_template, redirect, Response
 app = Flask(__name__)
 app.debug = True
 
 from a_star import AStar
 a_star = AStar()
 
-import json
-
-led_state = False
+import camera
+camera_server = camera.CameraServer()
 
 @app.route("/")
 def hello():
@@ -41,8 +40,9 @@ def camera(pan, tilt):
     a_star.camera(int(pan), int(tilt))
     return json.dumps((a_star.cameraPan, a_star.cameraTilt))
 
+led_state = False
 @app.route("/led/<int:led>")
-def leds(led):
+def led(led):
     a_star.led = led
     global led_state
     led_state = led
@@ -51,9 +51,9 @@ def leds(led):
 @app.route("/heartbeat/<int:state>")
 def heartbeat(state):
     if state == 0:
-        a_star.led(led_state)
+        a_star.led = led_state
     else:
-        a_star.led(not led_state)
+        a_star.led = not led_state
     return ""
 
 @app.route("/play_notes/<notes>")
@@ -63,12 +63,18 @@ def play_notes(notes):
 
 @app.route("/halt")
 def halt():
-    call(["bash", "-c", "(sleep 2; sudo halt)&"])
+    subprocess.call(["bash", "-c", "(sleep 2; sudo halt)&"])
     return redirect("/shutting-down")
 
 @app.route("/shutting-down")
 def shutting_down():
     return "Shutting down in 2 seconds! You can remove power when the green LED stops flashing."
 
+@app.before_first_request
+def start_camera():
+    pass
+
 if __name__ == "__main__":
+    camera_server.start()
     app.run(host = "0.0.0.0")
+    camera_server.stop()
