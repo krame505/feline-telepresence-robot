@@ -7,7 +7,6 @@
 struct __attribute__((packed)) Data {
   bool led;
   uint16_t batteryMillivolts;
-  uint16_t analog[6];
   
   bool playNotes;
   char notes[14];
@@ -28,7 +27,6 @@ void setup() {
   setup_encoders();
 
   motors.flipM2(true);
-
   
   // Set up the slave at I2C address 20.
   slave.init(20);
@@ -44,10 +42,6 @@ void loop() {
 
   // Write various values into the data structure.
   slave.buffer.batteryMillivolts = readBatteryMillivoltsLV();
-
-  for (uint8_t i=0; i<6; i++) {
-    slave.buffer.analog[i] = analogRead(i);
-  }
 
   ledYellow(slave.buffer.led);
 

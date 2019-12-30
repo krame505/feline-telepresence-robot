@@ -10,7 +10,6 @@ class AStar:
 struct Data {
   bool led;
   uint16_t batteryMillivolts;
-  uint16_t analog[6];
   
   bool playNotes;
   char notes[14];
