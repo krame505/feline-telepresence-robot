@@ -6,15 +6,19 @@ var mouse_dragging = false
 
 var camera_pan = 0
 var camera_tilt = 0
+var camera_pan_field = 65
+var camera_tilt_field = 50
 
 function init() {
     poll()
-    $("#joystick").bind("touchstart",touchmove)
-    $("#joystick").bind("touchmove",touchmove)
-    $("#joystick").bind("touchend",touchend)
-    $("#joystick").bind("mousedown",mousedown)
-    $(document).bind("mousemove",mousemove)
-    $(document).bind("mouseup",mouseup)
+    $("#joystick").bind("touchstart", joystickTouchMove)
+    $("#joystick").bind("touchmove", joystickTouchMove)
+    $("#joystick").bind("touchend", joystickTouchEnd)
+    $("#joystick").bind("mousedown", joystickMouseDown)
+    $("#cameraFeed").bind("mousedown", cameraMouseDown)
+    $("#cameraFeed").bind("touchstart", cameraTouchStart)
+    $(document).bind("mousemove", joystickMouseMove)
+    $(document).bind("mouseup", joystickMouseUp)
     $(document).keydown(function (e) {
 	switch (e.which) {
         case 37: // left
@@ -40,14 +44,14 @@ function init() {
 }
 
 function poll() {
-    $.ajax({url: "status.json"}).done(update_status)
+    $.ajax({url: "status.json"}).done(updateStatus)
     if (stop_motors && !block_set_motors) {
 	setMotors(0,0);
 	stop_motors = false
     }
 }
 
-function update_status(json) {
+function updateStatus(json) {
     s = JSON.parse(json)
 
     $("#battery_millivolts").html(s["battery_millivolts"])
@@ -57,23 +61,23 @@ function update_status(json) {
 
     camera_pan = s["camera"][0]
     camera_tilt = s["camera"][1]
-    $("#camera").html("Camera: " + camera_pan + " " + camera_tilt)
+    $("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
 
     setTimeout(poll, 100)
 }
 
-function touchmove(e) {
+function joystickTouchMove(e) {
     e.preventDefault()
     touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-    dragTo(touch.pageX, touch.pageY)
+    joystickDragTo(touch.pageX, touch.pageY)
 }
 
-function mousedown(e) {
+function joystickMouseDown(e) {
     e.preventDefault()
     mouse_dragging = true
 }
 
-function mouseup(e) {
+function joystickMouseUp(e) {
     if (mouse_dragging) {
 	e.preventDefault()
 	mouse_dragging = false
@@ -81,17 +85,17 @@ function mouseup(e) {
     }
 }
 
-function mousemove(e) {
+function joystickMouseMove(e) {
     if (mouse_dragging) {
 	e.preventDefault()
-	dragTo(e.pageX, e.pageY)
+	joystickDragTo(e.pageX, e.pageY)
     }
 }
 
-function dragTo(x, y) {
-    elm = $('#joystick').offset();
-    x = x - elm.left;
-    y = y - elm.top;
+function joystickDragTo(x, y) {
+    elm = $('#joystick').offset()
+    x = x - elm.left
+    y = y - elm.top
     w = $('#joystick').width()
     h = $('#joystick').height()
 
@@ -116,7 +120,7 @@ function dragTo(x, y) {
     setMotors(left_motor, right_motor)
 }
 
-function touchend(e) {
+function joystickTouchEnd(e) {
     e.preventDefault()
     stop_motors = true
 }
@@ -130,6 +134,39 @@ function setMotors(left, right) {
     $.ajax({url: "motors/" + left + "," + right}).done(function () {
 	block_set_motors = false
     })
+}
+
+function cameraMouseDown(e) {
+    e.preventDefault()
+    elem = $('#camera').offset()
+    x = e.pageX - elem.left
+    y = e.pageY - elem.top
+    w = $('#camera').width()
+    h = $('#camera').height()
+    if (x > 0 && x < w && y > 0 && y < h) {
+	x = (x-w/2.0)/w
+	y = (y-h/2.0)/h
+	pan = camera_pan - Math.round(x * camera_pan_field)
+	tilt = camera_tilt - Math.round(y * camera_tilt_field)
+	setCamera(pan, tilt)
+    }
+}
+
+function cameraTouchStart(e) {
+    e.preventDefault()
+    touch = e.originalEvent.touches[0]
+    elem = $('#camera').offset()
+    x = touch.pageX - elem.left
+    y = touch.pageY - elem.top
+    w = $('#camera').width()
+    h = $('#camera').height()
+    if (x > 0 && x < w && y > 0 && y < h) {
+	x = (x-w/2.0)/w
+	y = (y-h/2.0)/h
+	pan = camera_pan - Math.round(x * camera_pan_field)
+	tilt = camera_tilt - Math.round(y * camera_tilt_field)
+	setCamera(pan, tilt)
+    }
 }
 
 function cameraUp() {
@@ -151,24 +188,27 @@ function cameraRight() {
 function setCamera(pan, tilt) {
     if (block_set_camera) return
     block_set_camera = true
+
+    if (!pan)  pan = 0;
+    if (!tilt) tilt = 0;
     
     $.ajax({url: "camera/" + pan + "," + tilt}).done(function (json) {
 	c = JSON.parse(json)
 	camera_pan = c[0]
 	camera_tilt = c[1]
-	$("#camera").html("Camera: " + camera_pan + " " + camera_tilt)
+	$("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
 	block_set_camera = false
     })
 }
 
 function setLed() {
     led = $('#led')[0].checked ? 1 : 0
-    $.ajax({url: "led/"+led})
+    $.ajax({url: "led/" + led})
 }
 
 function playNotes() {
     notes = $('#notes').val()
-    $.ajax({url: "play_notes/"+notes})
+    $.ajax({url: "play_notes/" + notes})
 }
 
 function shutdown() {

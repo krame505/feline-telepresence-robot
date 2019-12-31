@@ -42,10 +42,11 @@
       <div id="joystick">
       </div>
 
-      <div id="camera">
+      </br>
+      <div id="cameraPos">
       </div>
-      <div id="camera_feed">
-	<canvas id="videoCanvas">
+      <div id="cameraFeed">
+	<canvas id="camera">
 	  <p>
 	    Please use a browser that supports the Canvas Element, like
 	    <a href="http://www.google.com/chrome">Chrome</a>,
@@ -56,7 +57,7 @@
 	<script type="text/javascript" src="static/jsmpg.js"></script>
 	<script type="text/javascript">
 	  // Show loading notice
-	  var canvas = document.getElementById('videoCanvas');
+	  var canvas = document.getElementById('camera');
 	  var ctx = canvas.getContext('2d');
 	  ctx.fillStyle = '#444';
 	  ctx.fillText('Loading...', canvas.width/2-30, canvas.height/3);

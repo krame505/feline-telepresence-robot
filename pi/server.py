@@ -31,13 +31,19 @@ def status():
 
 @app.route("/motors/<left>,<right>")
 def motors(left, right):
-    a_star.leftMotor = int(left)
-    a_star.rightMotor = int(right)
+    try:
+        a_star.leftMotor = int(left)
+        a_star.rightMotor = int(right)
+    except ValueError as e:
+        print(e)
     return ""
 
 @app.route("/camera/<pan>,<tilt>")
 def camera(pan, tilt):
-    a_star.camera(int(pan), int(tilt))
+    try:
+        a_star.camera(int(pan), int(tilt))
+    except ValueError as e:
+        print(e)
     return json.dumps((a_star.cameraPan, a_star.cameraTilt))
 
 led_state = False

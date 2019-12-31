@@ -60,7 +60,7 @@ table td, table th {
   margin-right: auto;
 }
 
-#videoCanvas {
+#camera {
     /* Always stretch the canvas to 640x480, regardless of its internal size. */
     width: 640px;
     height: 480px;
