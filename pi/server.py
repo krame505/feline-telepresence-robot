@@ -22,10 +22,12 @@ def status():
     battery_millivolts = a_star.batteryMillivolts
     encoders = a_star.leftEncoder, a_star.rightEncoder
     camera = a_star.cameraPan, a_star.cameraTilt
+    laser = {"power": a_star.laserPower, "pattern": a_star.getLaserPattern()}
     data = {
         "battery_millivolts": battery_millivolts,
         "encoders": encoders,
-        "camera": camera
+        "camera": camera,
+        "laser": laser
     }
     return json.dumps(data)
 
@@ -57,10 +59,18 @@ def laser(pan, tilt):
 @app.route("/laserPower/<on>")
 def laserPower(on):
     try:
-        a_star.laserPower(bool(int(on)))
+        a_star.laserPower = bool(int(on))
     except ValueError as e:
         print(e)
-    return ""
+    return json.dumps(on)
+
+@app.route("/laserPattern/<pattern>")
+def laserPattern(pattern):
+    try:
+        a_star.setLaserPattern(pattern)
+    except ValueError as e:
+        print(e)
+    return json.dumps(pattern)
 
 led_state = False
 @app.route("/led/<int:led>")

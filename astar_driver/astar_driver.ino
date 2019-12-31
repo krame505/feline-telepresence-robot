@@ -19,6 +19,13 @@ struct __attribute__((packed)) Data {
   bool laserServoCommand;
   uint8_t laserPan, laserTilt;
   bool laserPower;
+  uint8_t laserPattern;
+};
+
+enum LaserPattern {
+  STEADY,
+  BLINK,
+  RANDOM_WALK
 };
 
 PololuRPiSlave<struct Data, 5> slave;
@@ -27,8 +34,10 @@ AStar32U4Motors motors;
 
 #define LASER 11
 #define LASER_POWER 0.8
-#define LASER_BLINK_PERIOD 300
-#define LASER_BLINK_DUTY 0.6
+#define LASER_BLINK_PERIOD 200
+#define LASER_BLINK_DUTY 0.7
+#define LASER_WALK_MAX_STEP 1
+#define LASER_WALK_PERIOD 10
 
 void setup() {
   Serial.begin(115200);
@@ -76,10 +85,23 @@ void loop() {
   handleCameraServos(slave.buffer.cameraServoCommand);
   cameraPan(slave.buffer.cameraPan);
   cameraTilt(slave.buffer.cameraTilt);
+
+  static unsigned long lastWalkUpdate = millis();
+  if (slave.buffer.laserPattern == RANDOM_WALK && millis() > lastWalkUpdate + LASER_WALK_PERIOD) {
+    lastWalkUpdate = millis();
+    slave.buffer.laserServoCommand = true;
+    slave.buffer.laserPan += random(-LASER_WALK_MAX_STEP, LASER_WALK_MAX_STEP + 1);
+    slave.buffer.laserTilt += random(-LASER_WALK_MAX_STEP, LASER_WALK_MAX_STEP + 1);
+  }
+  
   handleLaserServos(slave.buffer.laserServoCommand);
   laserPan(slave.buffer.laserPan);
   laserTilt(slave.buffer.laserTilt);
-  bool blink_on = millis() % LASER_BLINK_PERIOD > LASER_BLINK_PERIOD * LASER_BLINK_DUTY;
+  
+  bool blink_on = true;
+  if (slave.buffer.laserPattern == BLINK) {
+    blink_on = millis() % LASER_BLINK_PERIOD > LASER_BLINK_PERIOD * LASER_BLINK_DUTY;
+  }
   analogWrite(LASER, slave.buffer.laserPower * 255 * LASER_POWER * blink_on);
 
   // When done WRITING, call finalizeWrites() to make modified

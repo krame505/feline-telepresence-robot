@@ -2,7 +2,6 @@
 var stop_motors = true
 var block_set_motors = false
 var block_set_laser = false
-var block_set_laser_power = false
 var block_set_camera = false
 var joystick_mouse_dragging = false
 var laser_mouse_dragging = false
@@ -71,6 +70,13 @@ function updateStatus(json) {
     camera_pan = s["camera"][0]
     camera_tilt = s["camera"][1]
     $("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
+
+    laser_power = s["laser"]["power"]
+    laser_pattern = s["laser"]["pattern"]
+    $('#laserPower')[0].checked = laser_power
+    $('#steady')[0].checked = laser_pattern == 'steady'
+    $('#blink')[0].checked = laser_pattern == 'blink'
+    $('#random_walk')[0].checked = laser_pattern == 'random_walk'
 
     setTimeout(poll, 100)
 }
@@ -148,7 +154,6 @@ function setMotors(left, right) {
 function laserMouseDown(e) {
     e.preventDefault()
     laser_mouse_dragging = true
-    setLaserPower(true)
 }
 
 function laserMouseMove(e) {
@@ -179,7 +184,6 @@ function laserTouchMove(e) {
 	pan = Math.round((1 - x / w) * 180)
 	tilt = Math.round((1 - y / h) * 180)
 	setLaser(pan, tilt)
-	setLaserPower(true)
     }
 }
 
@@ -187,13 +191,11 @@ function laserMouseUp(e) {
     e.preventDefault()
     if (laser_mouse_dragging) {
 	laser_mouse_dragging = false
-	setLaserPower(false)
     }
 }
 
 function laserTouchEnd(e) {
     e.preventDefault()
-    setLaserPower(false)
 }
 
 function setLaser(pan, tilt) {
@@ -210,13 +212,13 @@ function setLaser(pan, tilt) {
     })
 }
 
-function setLaserPower(power) {
-    if (block_set_laser_power) return
-    block_set_laser_power = true
-    
-    $.ajax({url: "laserPower/" + (power? 1 : 0)}).done(function () {
-	block_set_laser_power = false
-    })
+function setLaserPower() {
+    power = $('#laserPower')[0].checked
+    $.ajax({url: "laserPower/" + (power? 1 : 0)})
+}
+
+function setLaserPattern(pattern) {
+    $.ajax({url: "laserPattern/" + pattern})
 }
 
 function cameraMouseDown(e) {

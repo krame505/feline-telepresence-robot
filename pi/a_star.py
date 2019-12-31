@@ -22,8 +22,16 @@ struct Data {
   bool laserServoCommand;
   uint8_t laserPan, laserTilt;
   bool laserPower;
+  uint8_t laserPattern;
+};
+
+enum LaserPattern {
+  STEADY,
+  BLINK,
+  RANDOM_WALK
 };
     """, packed=True)
+    self._lib = self._ffi.dlopen(None)
     self._fields = dict(self._ffi.typeof("struct Data").fields)
 
   def __getattr__(self, fieldName):
@@ -52,7 +60,6 @@ struct Data {
     
     # Works because Arduino and RPi have the same endianness
     return self._ffi.from_buffer(self._ffi.getctype(field.type, "*"), bytes(byte_list))[0]
-    
 
   def __setattr__(self, fieldName, data):
     if fieldName and fieldName[0] == '_':
@@ -84,6 +91,9 @@ struct Data {
     self.laserServoCommand = True
     self.laserPan = min(max(pan, 0), 255)
     self.laserTilt = min(max(tilt, 0), 255)
-  
-  def laserPower(self, power):
-    self.laserPower = power
+
+  def getLaserPattern(self):
+    return self._ffi.typeof('enum LaserPattern').elements[self.laserPattern].lower()
+
+  def setLaserPattern(self, pattern):
+    self.laserPattern = getattr(self._lib, pattern.upper())

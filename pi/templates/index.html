@@ -40,14 +40,29 @@
       </table>
 
       <div>
-	<div id="joystick" style="float:left">
+	<div id="joystick" style="float: left">
 	</div>
-	<div id="laser" style="margin-left:20em">
+	<div id="laser" style="float: left">
 	  Laser
+	</div>
+	<div style="marginleft: 3em; text-align:left">
+	  <input type="checkbox" id="laserPower" onchange="setLaserPower()">
+	  Laser power
+          <br><br>
+	  Laser mode
+	  <br>
+	  <input type="radio" name="laserPattern" id="steady", onchange="setLaserPattern('steady')">
+	  Steady
+          <br>
+	  <input type="radio" name="laserPattern" id="blink", onchange="setLaserPattern('blink')">
+	  Blink
+          <br>
+	  <input type="radio" name="laserPattern" id="random_walk", onchange="setLaserPattern('random_walk')">
+	  Random walk
+          <br><br><br><br><br><br><br><br>
 	</div>
       </div>
 
-      </br>
       <div id="cameraPos">
       </div>
       <div id="cameraFeed">
