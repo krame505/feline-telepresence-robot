@@ -1,8 +1,11 @@
 // Copyright Pololu Corporation.  For more information, see https://www.pololu.com/
 var stop_motors = true
 var block_set_motors = false
+var block_set_laser = false
+var block_set_laser_power = false
 var block_set_camera = false
-var mouse_dragging = false
+var joystick_mouse_dragging = false
+var laser_mouse_dragging = false
 
 var camera_pan = 0
 var camera_tilt = 0
@@ -15,10 +18,16 @@ function init() {
     $("#joystick").bind("touchmove", joystickTouchMove)
     $("#joystick").bind("touchend", joystickTouchEnd)
     $("#joystick").bind("mousedown", joystickMouseDown)
-    $("#cameraFeed").bind("mousedown", cameraMouseDown)
-    $("#cameraFeed").bind("touchstart", cameraTouchStart)
     $(document).bind("mousemove", joystickMouseMove)
     $(document).bind("mouseup", joystickMouseUp)
+    $("#laser").bind("touchstart", laserTouchMove)
+    $("#laser").bind("touchmove", laserTouchMove)
+    $("#laser").bind("touchend", laserTouchEnd)
+    $("#laser").bind("mousedown", laserMouseDown)
+    $(document).bind("mousemove", laserMouseMove)
+    $(document).bind("mouseup", laserMouseUp)
+    $("#cameraFeed").bind("mousedown", cameraMouseDown)
+    $("#cameraFeed").bind("touchstart", cameraTouchStart)
     $(document).keydown(function (e) {
 	switch (e.which) {
         case 37: // left
@@ -74,19 +83,19 @@ function joystickTouchMove(e) {
 
 function joystickMouseDown(e) {
     e.preventDefault()
-    mouse_dragging = true
+    joystick_mouse_dragging = true
 }
 
 function joystickMouseUp(e) {
-    if (mouse_dragging) {
+    if (joystick_mouse_dragging) {
 	e.preventDefault()
-	mouse_dragging = false
+	joystick_mouse_dragging = false
 	stop_motors = true
     }
 }
 
 function joystickMouseMove(e) {
-    if (mouse_dragging) {
+    if (joystick_mouse_dragging) {
 	e.preventDefault()
 	joystickDragTo(e.pageX, e.pageY)
     }
@@ -133,6 +142,80 @@ function setMotors(left, right) {
 
     $.ajax({url: "motors/" + left + "," + right}).done(function () {
 	block_set_motors = false
+    })
+}
+
+function laserMouseDown(e) {
+    e.preventDefault()
+    laser_mouse_dragging = true
+    setLaserPower(true)
+}
+
+function laserMouseMove(e) {
+    e.preventDefault()
+    if (laser_mouse_dragging) {
+	elem = $('#laser').offset()
+	x = e.pageX - elem.left
+	y = e.pageY - elem.top
+	w = $('#laser').width()
+	h = $('#laser').height()
+	if (x > 0 && x < w && y > 0 && y < h) {
+	    pan = Math.round((1 - x / w) * 180)
+	    tilt = Math.round((1 - y / h) * 180)
+	    setLaser(pan, tilt)
+	}
+    }
+}
+
+function laserTouchMove(e) {
+    e.preventDefault()
+    touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+    elem = $('#laser').offset()
+    x = touch.pageX - elem.left
+    y = touch.pageY - elem.top
+    w = $('#laser').width()
+    h = $('#laser').height()
+    if (x > 0 && x < w && y > 0 && y < h) {
+	pan = Math.round((1 - x / w) * 180)
+	tilt = Math.round((1 - y / h) * 180)
+	setLaser(pan, tilt)
+	setLaserPower(true)
+    }
+}
+
+function laserMouseUp(e) {
+    e.preventDefault()
+    if (laser_mouse_dragging) {
+	laser_mouse_dragging = false
+	setLaserPower(false)
+    }
+}
+
+function laserTouchEnd(e) {
+    e.preventDefault()
+    setLaserPower(false)
+}
+
+function setLaser(pan, tilt) {
+    if (block_set_laser) return
+    block_set_laser = true
+    
+    if (!pan)  pan = 0;
+    if (!tilt) tilt = 0;
+    
+    $("#laser").html("Laser: " + pan + " " + tilt)
+    
+    $.ajax({url: "laser/" + pan + "," + tilt}).done(function () {
+	block_set_laser = false
+    })
+}
+
+function setLaserPower(power) {
+    if (block_set_laser_power) return
+    block_set_laser_power = true
+    
+    $.ajax({url: "laserPower/" + (power? 1 : 0)}).done(function () {
+	block_set_laser_power = false
     })
 }
 

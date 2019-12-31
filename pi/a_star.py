@@ -17,8 +17,11 @@ struct Data {
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
 
-  bool servoCommand;
+  bool cameraServoCommand;
   uint8_t cameraPan, cameraTilt;
+  bool laserServoCommand;
+  uint8_t laserPan, laserTilt;
+  bool laserPower;
 };
     """, packed=True)
     self._fields = dict(self._ffi.typeof("struct Data").fields)
@@ -73,6 +76,14 @@ struct Data {
     self.playNotes = True
   
   def camera(self, pan, tilt):
-    self.servoCommand = True
+    self.cameraServoCommand = True
     self.cameraPan = min(max(pan, 0), 255)
     self.cameraTilt = min(max(tilt, 0), 255)
+  
+  def laser(self, pan, tilt):
+    self.laserServoCommand = True
+    self.laserPan = min(max(pan, 0), 255)
+    self.laserTilt = min(max(tilt, 0), 255)
+  
+  def laserPower(self, power):
+    self.laserPower = power

@@ -14,19 +14,29 @@ struct __attribute__((packed)) Data {
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
 
-  bool servoCommand;
+  bool cameraServoCommand;
   uint8_t cameraPan, cameraTilt;
+  bool laserServoCommand;
+  uint8_t laserPan, laserTilt;
+  bool laserPower;
 };
 
 PololuRPiSlave<struct Data, 5> slave;
 PololuBuzzer buzzer;
 AStar32U4Motors motors;
 
+#define LASER 11
+#define LASER_POWER 0.8
+#define LASER_BLINK_PERIOD 300
+#define LASER_BLINK_DUTY 0.6
+
 void setup() {
   Serial.begin(115200);
   setup_encoders();
 
   motors.flipM2(true);
+  
+  pinMode(LASER, OUTPUT);
   
   // Set up the slave at I2C address 20.
   slave.init(20);
@@ -63,9 +73,14 @@ void loop() {
   slave.buffer.leftEncoder = getM1Counts();
   slave.buffer.rightEncoder = getM2Counts();
   
-  handleServos(slave.buffer.servoCommand);
+  handleCameraServos(slave.buffer.cameraServoCommand);
   cameraPan(slave.buffer.cameraPan);
   cameraTilt(slave.buffer.cameraTilt);
+  handleLaserServos(slave.buffer.laserServoCommand);
+  laserPan(slave.buffer.laserPan);
+  laserTilt(slave.buffer.laserTilt);
+  bool blink_on = millis() % LASER_BLINK_PERIOD > LASER_BLINK_PERIOD * LASER_BLINK_DUTY;
+  analogWrite(LASER, slave.buffer.laserPower * 255 * LASER_POWER * blink_on);
 
   // When done WRITING, call finalizeWrites() to make modified
   // data available to I2C master.

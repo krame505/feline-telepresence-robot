@@ -60,6 +60,15 @@ table td, table th {
   margin-right: auto;
 }
 
+#laser {
+  border: 1px solid black;
+  background-color: red;
+  width: 14em;
+  height: 14em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #camera {
     /* Always stretch the canvas to 640x480, regardless of its internal size. */
     width: 640px;

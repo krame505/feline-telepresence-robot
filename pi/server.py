@@ -46,6 +46,22 @@ def camera(pan, tilt):
         print(e)
     return json.dumps((a_star.cameraPan, a_star.cameraTilt))
 
+@app.route("/laser/<pan>,<tilt>")
+def laser(pan, tilt):
+    try:
+        a_star.laser(int(pan), int(tilt))
+    except ValueError as e:
+        print(e)
+    return ""
+
+@app.route("/laserPower/<on>")
+def laserPower(on):
+    try:
+        a_star.laserPower(bool(int(on)))
+    except ValueError as e:
+        print(e)
+    return ""
+
 led_state = False
 @app.route("/led/<int:led>")
 def led(led):

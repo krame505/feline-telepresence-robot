@@ -8,18 +8,41 @@
 #define MIN_CAMERA_PAN 40
 #define MAX_CAMERA_PAN 180
 
+#define MIN_LASER_TILT 100
+#define MAX_LASER_TILT 180
+#define MIN_LASER_PAN 0
+#define MAX_LASER_PAN 160
+
+// Servo defs
 #define CAMERA_PAN 5
 #define CAMERA_TILT 7
+#define LASER_PAN 8
+#define LASER_TILT 20
 Servo cameraPanServo, cameraTiltServo;
+Servo laserPanServo, laserTiltServo;
 
-void attachServos() {
+void attachCameraServos() {
   cameraPanServo.attach(CAMERA_PAN);
   cameraTiltServo.attach(CAMERA_TILT);
 }
 
-void detachServos() {
+void detachCameraServos() {
   cameraPanServo.detach();
   cameraTiltServo.detach();
+  digitalWrite(CAMERA_PAN, LOW);
+  digitalWrite(CAMERA_TILT, LOW);
+}
+
+void attachLaserServos() {
+  laserPanServo.attach(LASER_PAN);
+  laserTiltServo.attach(LASER_TILT);
+}
+
+void detachLaserServos() {
+  laserPanServo.detach();
+  laserTiltServo.detach();
+  digitalWrite(LASER_PAN, LOW);
+  digitalWrite(LASER_TILT, LOW);
 }
 
 void cameraPan(uint8_t &angle) {
@@ -32,13 +55,34 @@ void cameraTilt(uint8_t &angle) {
   cameraTiltServo.write(angle);
 }
 
-void handleServos(bool &servoCommand) {
+void laserPan(uint8_t &angle) {
+  angle = min(max(angle, MIN_LASER_PAN), MAX_LASER_PAN);
+  laserPanServo.write(angle);
+}
+
+void laserTilt(uint8_t &angle) {
+  angle = min(max(angle, MIN_LASER_TILT), MAX_LASER_TILT);
+  laserTiltServo.write(angle);
+}
+
+void handleCameraServos(bool &servoCommand) {
   static unsigned long servoCommandTime = millis();
   if (servoCommand) {
     servoCommand = false;
     servoCommandTime = millis();
-    attachServos();
+    attachCameraServos();
   } else if (millis() > servoCommandTime + COMMAND_TIME) {
-    detachServos();
+    detachCameraServos();
+  }
+}
+
+void handleLaserServos(bool &servoCommand) {
+  static unsigned long servoCommandTime = millis();
+  if (servoCommand) {
+    servoCommand = false;
+    servoCommandTime = millis();
+    attachLaserServos();
+  } else if (millis() > servoCommandTime + COMMAND_TIME) {
+    detachLaserServos();
   }
 }
