@@ -23,6 +23,8 @@ struct Data {
   uint8_t laserPan, laserTilt;
   bool laserPower;
   uint8_t laserPattern;
+
+  bool dispenseTreats;
 };
 
 enum LaserPattern {
@@ -57,9 +59,13 @@ enum LaserPattern {
       print(e)
       # Fail on read errors for now
       return None
-    
-    # Works because Arduino and RPi have the same endianness
-    return self._ffi.from_buffer(self._ffi.getctype(field.type, "*"), bytes(byte_list))[0]
+
+    try:
+      # Works because Arduino and RPi have the same endianness
+      return self._ffi.from_buffer(self._ffi.getctype(field.type, "*"), bytes(byte_list))[0]
+    except ValueError as e:
+      # Fail on decoding errors for now
+      return None
 
   def __setattr__(self, fieldName, data):
     if fieldName and fieldName[0] == '_':
@@ -68,9 +74,14 @@ enum LaserPattern {
     field = self._fields[fieldName]
     address = field.offset
     
-    # Works because Arduino and RPi have the same endianness
-    data_array = list(bytes(self._ffi.buffer(self._ffi.new(self._ffi.getctype(field.type, "*"), data))))
-    
+    try:
+      # Works because Arduino and RPi have the same endianness
+      data_array = list(bytes(self._ffi.buffer(self._ffi.new(self._ffi.getctype(field.type, "*"), data))))
+    except ValueError as e:
+      print(e)
+      # Fail on encoding errors for now
+      return None
+      
     try:
       self._bus.write_i2c_block_data(20, address, data_array)
     except OSError:
@@ -93,7 +104,13 @@ enum LaserPattern {
     self.laserTilt = min(max(tilt, 0), 255)
 
   def getLaserPattern(self):
-    return self._ffi.typeof('enum LaserPattern').elements[self.laserPattern].lower()
+    try:
+      return self._ffi.typeof('enum LaserPattern').elements[self.laserPattern].lower()
+    except KeyError:
+      return None
 
   def setLaserPattern(self, pattern):
-    self.laserPattern = getattr(self._lib, pattern.upper())
+    try:
+      self.laserPattern = getattr(self._lib, pattern.upper())
+    except KeyError:
+      return None

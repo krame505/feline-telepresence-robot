@@ -16,9 +16,9 @@
 
       <h1>Feline Telepresence Robot Control Panel</h1>
 
-      <p><a href="/halt" onClick="return shutdown()">Shutdown...</a></p>
-      
       <p>
+	<a href="/halt" onClick="return shutdown()">Shutdown...</a>
+	&nbsp;
 	LED
 	<input type="checkbox" id="led" onchange="setLed()">
       </p>
@@ -38,6 +38,12 @@
 	  <td id="encoders0"></td><td id="encoders1"></td>
 	</tr>
       </table>
+
+      <button onclick="dispenseTreats()">
+	Dispense treats
+      </button>
+      <br>
+      <br>
 
       <div>
 	<div id="joystick" style="float: left">

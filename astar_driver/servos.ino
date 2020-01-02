@@ -13,13 +13,18 @@
 #define MIN_LASER_PAN 0
 #define MAX_LASER_PAN 160
 
+#define DISPENSE_IN 5
+#define DISPENSE_OUT 100
+
 // Servo defs
 #define CAMERA_PAN 5
 #define CAMERA_TILT 7
 #define LASER_PAN 8
 #define LASER_TILT 20
+#define DISPENSE 22
 Servo cameraPanServo, cameraTiltServo;
 Servo laserPanServo, laserTiltServo;
+Servo dispenseServo;
 
 void attachCameraServos() {
   cameraPanServo.attach(CAMERA_PAN);
@@ -85,4 +90,13 @@ void handleLaserServos(bool &servoCommand) {
   } else if (millis() > servoCommandTime + COMMAND_TIME) {
     detachLaserServos();
   }
+}
+
+void dispenseTreats() {
+  dispenseServo.attach(DISPENSE);
+  dispenseServo.write(DISPENSE_IN);
+  delay(500);
+  dispenseServo.write(DISPENSE_OUT);
+  delay(500);
+  dispenseServo.detach();
 }

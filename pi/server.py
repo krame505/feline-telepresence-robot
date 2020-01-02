@@ -72,6 +72,10 @@ def laserPattern(pattern):
         print(e)
     return json.dumps(pattern)
 
+@app.route("/dispenseTreats")
+def dispenseTreats():
+    a_star.dispenseTreats = True
+
 led_state = False
 @app.route("/led/<int:led>")
 def led(led):

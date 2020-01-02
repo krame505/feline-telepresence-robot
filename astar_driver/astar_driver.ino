@@ -20,6 +20,8 @@ struct __attribute__((packed)) Data {
   uint8_t laserPan, laserTilt;
   bool laserPower;
   uint8_t laserPattern;
+
+  bool dispenseTreats;
 };
 
 enum LaserPattern {
@@ -103,6 +105,11 @@ void loop() {
     blink_on = millis() % LASER_BLINK_PERIOD > LASER_BLINK_PERIOD * LASER_BLINK_DUTY;
   }
   analogWrite(LASER, slave.buffer.laserPower * 255 * LASER_POWER * blink_on);
+
+  if (slave.buffer.dispenseTreats) {
+    slave.buffer.dispenseTreats = false;
+    dispenseTreats();
+  }
 
   // When done WRITING, call finalizeWrites() to make modified
   // data available to I2C master.

@@ -286,6 +286,10 @@ function setCamera(pan, tilt) {
     })
 }
 
+function dispenseTreats() {
+    $.ajax({url: "dispenseTreats"})
+}
+
 function setLed() {
     led = $('#led')[0].checked ? 1 : 0
     $.ajax({url: "led/" + led})
