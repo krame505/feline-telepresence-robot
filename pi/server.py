@@ -5,7 +5,7 @@ import subprocess
 
 from flask import Flask, render_template, redirect, Response
 app = Flask(__name__)
-app.debug = True
+#app.debug = True
 
 from a_star import AStar
 a_star = AStar()

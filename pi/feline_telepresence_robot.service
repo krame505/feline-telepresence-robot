@@ -1,0 +1,10 @@
+Description=Feline Telepresence Robot Server
+After=multi-user.target
+
+[Service]
+User=pi
+Type=idle
+ExecStart=/usr/bin/python3 /home/pi/feline-telepresence-robot/pi/server.py
+
+[Install]
+WantedBy=multi-user.target
