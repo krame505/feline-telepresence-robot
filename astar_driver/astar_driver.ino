@@ -45,7 +45,7 @@ void setup() {
   Serial.begin(115200);
   setup_encoders();
 
-  motors.flipM2(true);
+  motors.flipM1(true);
   
   pinMode(LASER, OUTPUT);
   
@@ -79,10 +79,10 @@ void loop() {
     startedPlaying = false;
   }
   
-  motors.setSpeeds(slave.buffer.leftMotor, slave.buffer.rightMotor);
+  motors.setSpeeds(slave.buffer.rightMotor, slave.buffer.leftMotor);
 
-  slave.buffer.leftEncoder = getM1Counts();
-  slave.buffer.rightEncoder = getM2Counts();
+  slave.buffer.rightEncoder = getM1Counts();
+  slave.buffer.leftEncoder = getM2Counts();
   
   handleCameraServos(slave.buffer.cameraServoCommand);
   cameraPan(slave.buffer.cameraPan);
