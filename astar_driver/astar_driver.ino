@@ -13,6 +13,7 @@ struct __attribute__((packed)) Data {
   
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
+  int16_t leftSpeed, rightSpeed;
 
   bool cameraServoCommand;
   uint8_t cameraPan, cameraTilt;
@@ -34,6 +35,11 @@ PololuRPiSlave<struct Data, 5> slave;
 PololuBuzzer buzzer;
 AStar32U4Motors motors;
 
+#define MOTOR_UPDATE_PERIOD 150
+#define MOTOR_KP 0.3
+#define MOTOR_KI 0.15
+#define MOTOR_MAX_I 4000
+
 #define LASER 11
 #define LASER_POWER 0.8
 #define LASER_BLINK_PERIOD 200
@@ -45,7 +51,7 @@ void setup() {
   Serial.begin(115200);
   setup_encoders();
 
-  motors.flipM1(true);
+  motors.flipM2(true);
   
   pinMode(LASER, OUTPUT);
   
@@ -78,11 +84,35 @@ void loop() {
     slave.buffer.playNotes = false;
     startedPlaying = false;
   }
-  
-  motors.setSpeeds(slave.buffer.rightMotor, slave.buffer.leftMotor);
 
-  slave.buffer.rightEncoder = getM1Counts();
-  slave.buffer.leftEncoder = getM2Counts();
+  slave.buffer.leftEncoder = getM1Counts();
+  slave.buffer.rightEncoder = getM2Counts();
+  
+  static unsigned long nextMotorUpdate = 0;
+  if (millis() > nextMotorUpdate) {
+    nextMotorUpdate += MOTOR_UPDATE_PERIOD;
+
+    static int32_t lastM1 = getM1Counts();
+    static int32_t lastM2 = getM2Counts();
+    int16_t m1Speed = getM1Counts() - lastM1;
+    int16_t m2Speed = getM2Counts() - lastM2;
+    lastM1 = getM1Counts();
+    lastM2 = getM2Counts();
+    slave.buffer.leftSpeed = m1Speed;
+    slave.buffer.rightSpeed = m2Speed;
+
+    int16_t m1TargetSpeed = slave.buffer.leftMotor;
+    int16_t m2TargetSpeed = slave.buffer.rightMotor;
+    static int32_t m1I = 0, m2I = 0;
+    m1I += m1TargetSpeed - m1Speed;
+    m2I += m2TargetSpeed - m2Speed;
+    m1I = max(min(m1I, MOTOR_MAX_I), -MOTOR_MAX_I);
+    m2I = max(min(m2I, MOTOR_MAX_I), -MOTOR_MAX_I);
+    int16_t m1Power = MOTOR_KP * m1TargetSpeed + MOTOR_KI * m1I;
+    int16_t m2Power = MOTOR_KP * m2TargetSpeed + MOTOR_KI * m2I;
+    
+    motors.setSpeeds(m2Power, m1Power);
+  }
   
   handleCameraServos(slave.buffer.cameraServoCommand);
   cameraPan(slave.buffer.cameraPan);

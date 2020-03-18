@@ -16,6 +16,7 @@ struct Data {
   
   int16_t leftMotor, rightMotor;
   int32_t leftEncoder, rightEncoder;
+  int16_t leftSpeed, rightSpeed;
 
   bool cameraServoCommand;
   uint8_t cameraPan, cameraTilt;

@@ -66,6 +66,8 @@ function updateStatus(json) {
     
     $("#encoders0").html(s["encoders"][0])
     $("#encoders1").html(s["encoders"][1])
+    $("#speeds0").html(s["speeds"][0])
+    $("#speeds1").html(s["speeds"][1])
 
     camera_pan = s["camera"][0]
     camera_tilt = s["camera"][1]

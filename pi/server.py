@@ -21,11 +21,13 @@ def hello():
 def status():
     battery_millivolts = a_star.batteryMillivolts
     encoders = a_star.leftEncoder, a_star.rightEncoder
+    speeds = a_star.leftSpeed, a_star.rightSpeed
     camera = a_star.cameraPan, a_star.cameraTilt
     laser = {"power": a_star.laserPower, "pattern": a_star.getLaserPattern()}
     data = {
         "battery_millivolts": battery_millivolts,
         "encoders": encoders,
+        "speeds": speeds,
         "camera": camera,
         "laser": laser
     }
