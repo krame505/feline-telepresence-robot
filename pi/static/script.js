@@ -124,8 +124,8 @@ function joystickDragTo(x, y) {
     if (y < -1) y = -1
     if (y > 1) y = 1
 
-    left_motor = Math.round(400*(-y-x))
-    right_motor = Math.round(400*(-y+x))
+    left_motor = Math.round(400*(-y+x))
+    right_motor = Math.round(400*(-y-x))
 
     if (left_motor > 400) left_motor = 400
     if (left_motor < -400) left_motor = -400
