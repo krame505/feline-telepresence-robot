@@ -19,7 +19,6 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 WIDTH = 640
 HEIGHT = 480
 FRAMERATE = 24
-WS_PORT = 8084
 JSMPEG_MAGIC = b'jsmp'
 JSMPEG_HEADER = struct.Struct('>4sHH')
 VFLIP = False
@@ -86,10 +85,10 @@ class CameraServer:
                 camera.vflip = VFLIP # flips image rightside up, as needed
                 camera.hflip = HFLIP # flips image left-right, as needed
                 time.sleep(1) # camera warm-up time
-                print('Initializing websockets server on port %d' % WS_PORT)
+                print('Initializing websockets server on port %d' % port)
                 WebSocketWSGIHandler.http_version = '1.1'
                 websocket_server = make_server(
-                    '', WS_PORT,
+                    '', port,
                     server_class=WSGIServer,
                     handler_class=WebSocketWSGIRequestHandler,
                     app=WebSocketWSGIApplication(handler_cls=StreamingWebSocket))
@@ -125,10 +124,10 @@ class CameraServer:
         except picamera.exc.PiCameraMMALError:
             print('Pi camera is already running!')
 
-    def start(self):
+    def start(self, port=8084):
         assert not self.started
         self.started = True
-        self.camera_thread = threading.Thread(target=self._run)
+        self.camera_thread = threading.Thread(target=self._run, args=(port,))
         self.camera_thread.start()
 
     def stop(self):
