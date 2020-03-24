@@ -76,7 +76,7 @@ class CameraServer:
     def __init__(self):
         self.started = False
     
-    def _run(self):
+    def _run(self, port):
         print('Initializing camera')
         try:
             with picamera.PiCamera() as camera:
