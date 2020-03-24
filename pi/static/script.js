@@ -307,3 +307,9 @@ function shutdown() {
 	return true
     return false
 }
+
+function restart() {
+    if (confirm("Really reboot the Raspberry Pi?"))
+	return true
+    return false
+}

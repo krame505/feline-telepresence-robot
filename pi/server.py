@@ -101,12 +101,22 @@ def play_notes(notes):
 
 @app.route("/halt")
 def halt():
-    subprocess.call(["bash", "-c", "(sleep 2; sudo halt)&"])
+    subprocess.call(["bash", "-c", "(sleep 1; sudo halt)&"])
     return redirect("/shutting-down")
+
+@app.route("/restart")
+def restart():
+    subprocess.call(["bash", "-c", "(sleep 1; sudo shutdown -r now)&"])
+    return redirect("/restarting")
 
 @app.route("/shutting-down")
 def shutting_down():
     return "Shutting down in 2 seconds! You can remove power when the green LED stops flashing."
+    return redirect("/restarting")
+
+@app.route("/restarting")
+def restarting():
+    return "<html><body><p>Restarting, you will be redirected in 15 seconds...</p><script>var timer = setTimeout(function() {{window.location='/'}}, 15000);</script></body></html>"
 
 @app.before_first_request
 def start_camera():
