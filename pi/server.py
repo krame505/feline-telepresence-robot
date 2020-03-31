@@ -76,7 +76,8 @@ def laserPattern(pattern):
 
 @app.route("/dispenseTreats")
 def dispenseTreats():
-    a_star.dispenseTreats = True
+    a_star.dispenseTreats()
+    return ""
 
 led_state = False
 @app.route("/led/<int:led>")

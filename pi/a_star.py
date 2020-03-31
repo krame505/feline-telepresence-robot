@@ -25,7 +25,7 @@ struct Data {
   bool laserPower;
   uint8_t laserPattern;
 
-  bool dispenseTreats;
+  uint8_t dispenseTreatsCode;
 };
 
 enum LaserPattern {
@@ -115,3 +115,6 @@ enum LaserPattern {
       self.laserPattern = getattr(self._lib, pattern.upper())
     except KeyError:
       return None
+
+  def dispenseTreats(self):
+    self.dispenseTreatsCode = 0xAA # Non-trivial bit pattern to avoid accidental release due to bit errors

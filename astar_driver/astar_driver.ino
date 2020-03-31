@@ -22,7 +22,7 @@ struct __attribute__((packed)) Data {
   bool laserPower;
   uint8_t laserPattern;
 
-  bool dispenseTreats;
+  uint8_t dispenseTreatsCode;
 };
 
 enum LaserPattern {
@@ -136,8 +136,8 @@ void loop() {
   }
   analogWrite(LASER, slave.buffer.laserPower * 255 * LASER_POWER * blink_on);
 
-  if (slave.buffer.dispenseTreats) {
-    slave.buffer.dispenseTreats = false;
+  if (slave.buffer.dispenseTreatsCode == 0xAA) {
+    slave.buffer.dispenseTreatsCode = 0;
     dispenseTreats();
   }
 
