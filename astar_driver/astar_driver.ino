@@ -36,8 +36,8 @@ PololuBuzzer buzzer;
 AStar32U4Motors motors;
 
 #define MOTOR_UPDATE_PERIOD 150
-#define MOTOR_KP 0.3
-#define MOTOR_KI 0.15
+#define MOTOR_KP 0.5
+#define MOTOR_KI 0.16
 #define MOTOR_MAX_I 4000
 
 #define LASER 11
