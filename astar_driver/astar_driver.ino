@@ -37,8 +37,8 @@ AStar32U4Motors motors;
 
 #define MOTOR_UPDATE_PERIOD 150
 #define MOTOR_KP 0.6
-#define MOTOR_KI 0.15
-#define MOTOR_MAX_I 5000
+#define MOTOR_KI 0.10
+#define MOTOR_MAX_I 7500
 
 #define LASER 11
 #define LASER_POWER 0.8
