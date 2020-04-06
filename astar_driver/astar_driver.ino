@@ -42,7 +42,7 @@ AStar32U4Motors motors;
 #define MOTOR_MAX_I 7500
 
 #define LASER 11
-#define LASER_POWER 0.8
+#define LASER_POWER 0.9
 #define LASER_BLINK_PERIOD 200
 #define LASER_BLINK_DUTY 0.7
 #define LASER_WALK_MAX_STEP 1
