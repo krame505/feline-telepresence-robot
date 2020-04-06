@@ -110,10 +110,14 @@ def restart():
     subprocess.call(["bash", "-c", "(sleep 1; sudo shutdown -r now)&"])
     return redirect("/restarting")
 
+@app.route("/reset")
+def reset():
+    a_star.reset()
+    return ""
+
 @app.route("/shutting-down")
 def shutting_down():
     return "Shutting down in 2 seconds! You can remove power when the green LED stops flashing."
-    return redirect("/restarting")
 
 @app.route("/restarting")
 def restarting():

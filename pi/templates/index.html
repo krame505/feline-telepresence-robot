@@ -17,8 +17,9 @@
       <h1>Feline Telepresence Robot Control Panel</h1>
 
       <p>
-	<a href="/halt" onClick="return shutdown()">Shutdown...</a>
-	<a href="/restart" onClick="return restart()">Restart...</a>
+	<a href="/halt" onClick="return shutdown()">Shutdown Pi...</a>
+	<a href="/restart" onClick="return restart()">Restart Pi...</a>
+	<a href="#" onClick="return reset()">Reset A*</a>
 	&nbsp;
 	LED
 	<input type="checkbox" id="led" onchange="setLed()">

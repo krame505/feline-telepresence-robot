@@ -26,6 +26,7 @@ struct Data {
   uint8_t laserPattern;
 
   uint8_t dispenseTreatsCode;
+  uint8_t resetCode;
 };
 
 enum LaserPattern {
@@ -118,3 +119,6 @@ enum LaserPattern {
 
   def dispenseTreats(self):
     self.dispenseTreatsCode = 0xAA # Non-trivial bit pattern to avoid accidental release due to bit errors
+
+  def reset(self):
+    self.resetCode = 0xBB

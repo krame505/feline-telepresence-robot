@@ -23,6 +23,7 @@ struct __attribute__((packed)) Data {
   uint8_t laserPattern;
 
   uint8_t dispenseTreatsCode;
+  uint8_t resetCode;
 };
 
 enum LaserPattern {
@@ -71,6 +72,11 @@ void loop() {
   slave.buffer.batteryMillivolts = readBatteryMillivoltsLV();
 
   ledYellow(slave.buffer.led);
+
+  if (slave.buffer.resetCode == 0xBB) {
+    slave.buffer.resetCode = 0;
+    asm volatile ("jmp 0");
+  }
 
   // Playing music involves both reading and writing, since we only
   // want to do it once.

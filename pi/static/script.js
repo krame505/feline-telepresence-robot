@@ -313,3 +313,7 @@ function restart() {
 	return true
     return false
 }
+
+function reset() {
+    $.ajax({url: "reset"})
+}
