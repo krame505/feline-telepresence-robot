@@ -10,14 +10,32 @@ app = Flask(__name__)
 from a_star import AStar
 a_star = AStar()
 
+from flask_httpauth import HTTPBasicAuth
+auth = HTTPBasicAuth()
+
 import camera
 camera_server = camera.CameraServer()
 
+try:
+    with open("/home/pi/password.txt") as f:
+        password = f.readline().rstrip()
+except IOError as e:
+    print("Password not set!")
+    password = None
+
+@auth.verify_password
+def verity_password(given_username, given_password):
+    # Ignore user name for now
+    #print(password, given_password, password == given_password)
+    return password is None or given_password == password
+
 @app.route("/")
-def hello():
+@auth.login_required
+def index():
     return render_template("index.html")
 
 @app.route("/status.json")
+@auth.login_required
 def status():
     battery_millivolts = a_star.batteryMillivolts
     encoders = a_star.leftEncoder, a_star.rightEncoder
@@ -34,6 +52,7 @@ def status():
     return json.dumps(data)
 
 @app.route("/motors/<left>,<right>")
+@auth.login_required
 def motors(left, right):
     try:
         a_star.leftMotor = int(left)
@@ -43,6 +62,7 @@ def motors(left, right):
     return ""
 
 @app.route("/camera/<pan>,<tilt>")
+@auth.login_required
 def camera(pan, tilt):
     try:
         a_star.camera(int(pan), int(tilt))
@@ -51,6 +71,7 @@ def camera(pan, tilt):
     return json.dumps((a_star.cameraPan, a_star.cameraTilt))
 
 @app.route("/laser/<pan>,<tilt>")
+@auth.login_required
 def laser(pan, tilt):
     try:
         a_star.laser(int(pan), int(tilt))
@@ -59,6 +80,7 @@ def laser(pan, tilt):
     return ""
 
 @app.route("/laserPower/<on>")
+@auth.login_required
 def laserPower(on):
     try:
         a_star.laserPower = bool(int(on))
@@ -67,6 +89,7 @@ def laserPower(on):
     return json.dumps(on)
 
 @app.route("/laserPattern/<pattern>")
+@auth.login_required
 def laserPattern(pattern):
     try:
         a_star.setLaserPattern(pattern)
@@ -75,6 +98,7 @@ def laserPattern(pattern):
     return json.dumps(pattern)
 
 @app.route("/dispenseTreats")
+@auth.login_required
 def dispenseTreats():
     a_star.dispenseTreats()
     return ""
@@ -96,36 +120,38 @@ def heartbeat(state):
     return ""
 
 @app.route("/play_notes/<notes>")
+@auth.login_required
 def play_notes(notes):
     a_star.play_notes(notes)
     return ""
 
 @app.route("/halt")
+@auth.login_required
 def halt():
     subprocess.call(["bash", "-c", "(sleep 1; sudo halt)&"])
     return redirect("/shutting-down")
 
 @app.route("/restart")
+@auth.login_required
 def restart():
     subprocess.call(["bash", "-c", "(sleep 1; sudo shutdown -r now)&"])
     return redirect("/restarting")
 
 @app.route("/reset")
+@auth.login_required
 def reset():
     a_star.reset()
     return ""
 
 @app.route("/shutting-down")
+@auth.login_required
 def shutting_down():
     return "Shutting down in 2 seconds! You can remove power when the green LED stops flashing."
 
 @app.route("/restarting")
+@auth.login_required
 def restarting():
     return "<html><body><p>Restarting, you will be redirected in 15 seconds...</p><script>var timer = setTimeout(function() {{window.location='/'}}, 15000);</script></body></html>"
-
-@app.before_first_request
-def start_camera():
-    pass
 
 if __name__ == "__main__":
     camera_server.start(port=8084)
