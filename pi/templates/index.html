@@ -28,28 +28,33 @@
       <p>
 	<input type="text" id="notes" maxlength="14" value="l16ceg>c">
 	<button onclick="playNotes()">Play</button>
+
+	&nbsp;&nbsp;&nbsp;
+	
+	<button onclick="dispenseTreats()">Dispense treats</button>
       </p>
-
-      <table>
-	<tr><th>Battery</th><td class="wide"><span id="battery_millivolts"></span> mV</td></tr>
-      </table>
-
-      <table>
-	<tr>
-	  <th>Distance</th>
-	  <td id="encoders0"></td><td id="encoders1"></td>
-	</tr>
-	<tr>
-	  <th rowspan=2>Speed</th>
-	  <td id="speeds0"></td><td id="speeds1"></td>
-	</tr>
-      </table>
-
-      <button onclick="dispenseTreats()">
-	Dispense treats
-      </button>
-      <br>
-      <br>
+      
+      <div>
+	<div style="width: 50%; float: left">
+	  <table>
+	    <tr>
+	      <th>Distance</th>
+	      <td id="encoders0"></td><td id="encoders1"></td>
+	    </tr>
+	    <tr>
+	      <th rowspan=2>Speed</th>
+	      <td id="speeds0"></td><td id="speeds1"></td>
+	    </tr>
+	  </table>
+	</div>
+	<div style="width: 50%; float: right">
+	  <table>
+	    <tr><th>Battery</th><td class="wide"><span id="battery_millivolts"></span> mV</td></tr>
+	  </table>
+	</div>
+      </div>
+      
+      <br><br><br><br><br>
 
       <div>
 	<div id="joystick" style="float: left">
@@ -71,9 +76,11 @@
           <br>
 	  <input type="radio" name="laserPattern" id="random_walk", onchange="setLaserPattern('random_walk')">
 	  Random walk
-          <br><br><br><br><br><br><br><br>
+          <br><br><br><br><br><br><br>
 	</div>
       </div>
+
+      <br>
 
       <div id="cameraPos">
       </div>
