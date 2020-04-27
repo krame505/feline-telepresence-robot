@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import picamera
 import time
@@ -73,10 +74,13 @@ class BroadcastThread(threading.Thread):
             self.converter.stdout.close()
 
 class CameraServer:
-    def __init__(self):
-        self.started = False
+    def __init__(self, port):
+        self.port = port
+        self.running = False
     
-    def _run(self, port):
+    def run(self):
+        assert not self.running
+        self.running = True
         print('Initializing camera')
         try:
             with picamera.PiCamera() as camera:
@@ -85,10 +89,10 @@ class CameraServer:
                 camera.vflip = VFLIP # flips image rightside up, as needed
                 camera.hflip = HFLIP # flips image left-right, as needed
                 time.sleep(1) # camera warm-up time
-                print('Initializing websockets server on port %d' % port)
+                print('Initializing websockets server on port %d' % self.port)
                 WebSocketWSGIHandler.http_version = '1.1'
                 websocket_server = make_server(
-                    '', port,
+                    '', self.port,
                     server_class=WSGIServer,
                     handler_class=WebSocketWSGIRequestHandler,
                     app=WebSocketWSGIApplication(handler_cls=StreamingWebSocket))
@@ -104,7 +108,7 @@ class CameraServer:
                     websocket_thread.start()
                     print('Starting broadcast thread')
                     broadcast_thread.start()
-                    while self.started:
+                    while self.running:
                         camera.wait_recording(1)
                 except BrokenPipeError:
                     pass
@@ -124,14 +128,11 @@ class CameraServer:
         except picamera.exc.PiCameraMMALError:
             print('Pi camera is already running!')
 
-    def start(self, port=8084):
-        assert not self.started
-        self.started = True
-        self.camera_thread = threading.Thread(target=self._run, args=(port,))
-        self.camera_thread.start()
-
     def stop(self):
-        assert self.started
-        self.started = False
-        self.camera_thread.join()
+        assert self.running
+        self.running = False
     
+if __name__ == '__main__':
+    server = CameraServer(8084)
+    
+    server.run()

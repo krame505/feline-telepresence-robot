@@ -13,9 +13,6 @@ a_star = AStar()
 from flask_httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
 
-import camera
-camera_server = camera.CameraServer()
-
 try:
     with open("/home/pi/password.txt") as f:
         password = f.readline().rstrip()
@@ -154,6 +151,4 @@ def restarting():
     return "<html><body><p>Restarting, you will be redirected in 15 seconds...</p><script>var timer = setTimeout(function() {{window.location='/'}}, 15000);</script></body></html>"
 
 if __name__ == "__main__":
-    camera_server.start(port=8084)
     app.run(host="0.0.0.0", port=4242)
-    camera_server.stop()

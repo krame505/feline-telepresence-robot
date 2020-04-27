@@ -5,6 +5,9 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-cp a_star_heartbeat.service /lib/systemd/system/
+cp feline_telepresence_robot.service /lib/systemd/system/
+cp camera_server.service /lib/systemd/system/
 systemctl enable feline_telepresence_robot
+systemctl enable camera_server
 systemctl start feline_telepresence_robot
+systemctl start camera_server
