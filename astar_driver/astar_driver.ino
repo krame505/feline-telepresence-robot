@@ -36,6 +36,8 @@ PololuRPiSlave<struct Data, 5> slave;
 PololuBuzzer buzzer;
 AStar32U4Motors motors;
 
+#define MIN_VOLTAGE 2500
+
 #define MOTOR_UPDATE_PERIOD 150
 #define MOTOR_KP 0.6
 #define MOTOR_KI 0.10
@@ -114,9 +116,14 @@ void loop() {
     m2I += m2TargetSpeed - m2Speed;
     m1I = max(min(m1I, MOTOR_MAX_I), -MOTOR_MAX_I);
     m2I = max(min(m2I, MOTOR_MAX_I), -MOTOR_MAX_I);
+
+    // Reset I if motors are undervolted
+    if (slave.buffer.batteryMillivolts < MIN_VOLTAGE) {
+      m1I = m2I = 0;
+    }
+    
     int16_t m1Power = MOTOR_KP * m1TargetSpeed + MOTOR_KI * m1I;
     int16_t m2Power = MOTOR_KP * m2TargetSpeed + MOTOR_KI * m2I;
-    
     motors.setSpeeds(m2Power, m1Power);
   }
   
