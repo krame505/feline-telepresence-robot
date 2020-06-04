@@ -5,7 +5,7 @@
 // Angle limits
 #define MIN_CAMERA_TILT 0
 #define MAX_CAMERA_TILT 180
-#define MIN_CAMERA_PAN 40
+#define MIN_CAMERA_PAN 25
 #define MAX_CAMERA_PAN 180
 
 #define MIN_LASER_TILT 100
