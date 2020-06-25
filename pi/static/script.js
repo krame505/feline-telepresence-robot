@@ -1,9 +1,14 @@
 // Copyright Pololu Corporation.  For more information, see https://www.pololu.com/
+
+// Handling for mouse "joystick"s
 var joystick_mouse_dragging = false
 var laser_mouse_dragging = false
 
+// Current camera position
 var camera_pan = 0
 var camera_tilt = 0
+
+// Approximate camera field of view, in degrees
 var camera_pan_field = 65
 var camera_tilt_field = 50
 
