@@ -62,10 +62,28 @@ def motors(left, right):
 @auth.login_required
 def camera(pan, tilt):
     try:
-        a_star.camera(int(pan), int(tilt))
+        res = a_star.camera(int(pan), int(tilt))
     except ValueError as e:
         print(e)
-    return json.dumps((a_star.cameraPan, a_star.cameraTilt))
+    return json.dumps(res)
+
+@app.route("/cameraPanBy/<delta>")
+@auth.login_required
+def cameraPanBy(delta):
+    try:
+        res = a_star.cameraPanBy(int(delta))
+    except ValueError as e:
+        print(e)
+    return json.dumps(res)
+
+@app.route("/cameraTiltBy/<delta>")
+@auth.login_required
+def cameraTiltBy(delta):
+    try:
+        res = a_star.cameraTiltBy(int(delta))
+    except ValueError as e:
+        print(e)
+    return json.dumps(res)
 
 @app.route("/laser/<pan>,<tilt>")
 @auth.login_required

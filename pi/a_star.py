@@ -1,6 +1,7 @@
 import smbus
 import time
 import cffi
+import threading
 
 class AStar:
   def __init__(self):
@@ -37,6 +38,7 @@ enum LaserPattern {
     """, packed=True)
     self._lib = self._ffi.dlopen(None)
     self._fields = dict(self._ffi.typeof("struct Data").fields)
+    self._lock = threading.Semaphore()
 
   def __getattr__(self, fieldName):
     field = self._fields[fieldName]
@@ -53,6 +55,7 @@ enum LaserPattern {
     # A delay of 0.0001 (100 us) after each write is enough to account
     # for the worst-case situation in our example code.
 
+    self._lock.acquire()
     try:
       self._bus.write_byte(20, address)
       time.sleep(0.0002)
@@ -61,7 +64,9 @@ enum LaserPattern {
       print(e)
       # Fail on read errors for now
       return None
-
+    finally:
+      self._lock.release()
+      
     try:
       # Works because Arduino and RPi have the same endianness
       return self._ffi.from_buffer(self._ffi.getctype(field.type, "*"), bytes(byte_list))[0]
@@ -84,12 +89,15 @@ enum LaserPattern {
       # Fail on encoding errors for now
       return None
       
+    self._lock.acquire()
     try:
       self._bus.write_i2c_block_data(20, address, data_array)
+      time.sleep(0.0002)
     except OSError:
       # Ignore write errors for now
       pass
-    time.sleep(0.0002)
+    finally:
+      self._lock.release()
 
   def play_notes(self, notes):
     self.notes = bytes(notes, encoding='ASCII')
@@ -97,8 +105,19 @@ enum LaserPattern {
   
   def camera(self, pan, tilt):
     self.cameraServoCommand = True
-    self.cameraPan = min(max(pan, 0), 255)
-    self.cameraTilt = min(max(tilt, 0), 255)
+    self.cameraPan = newPan = min(max(pan, 0), 255)
+    self.cameraTilt = newTilt = min(max(tilt, 0), 255)
+    return newPan, newTilt
+  
+  def cameraPanBy(self, delta):
+    self.cameraServoCommand = True
+    self.cameraPan = res = min(max(self.cameraPan + delta, 0), 255)
+    return res
+  
+  def cameraTiltBy(self, delta):
+    self.cameraServoCommand = True
+    self.cameraTilt = res = min(max(self.cameraTilt + delta, 0), 255)
+    return res
   
   def laser(self, pan, tilt):
     self.laserServoCommand = True

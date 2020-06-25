@@ -1,8 +1,4 @@
 // Copyright Pololu Corporation.  For more information, see https://www.pololu.com/
-var stop_motors = true
-var block_set_motors = false
-var block_set_laser = false
-var block_set_camera = false
 var joystick_mouse_dragging = false
 var laser_mouse_dragging = false
 
@@ -13,6 +9,9 @@ var camera_tilt_field = 50
 
 function init() {
     poll()
+    setMotors(0,0)
+    
+    $(document).keydown(keydown);
     $("#joystick").bind("touchstart", joystickTouchMove)
     $("#joystick").bind("touchmove", joystickTouchMove)
     $("#joystick").bind("touchend", joystickTouchEnd)
@@ -27,36 +26,10 @@ function init() {
     $(document).bind("mouseup", laserMouseUp)
     $("#cameraFeed").bind("mousedown", cameraMouseDown)
     $("#cameraFeed").bind("touchstart", cameraTouchStart)
-    $(document).keydown(function (e) {
-	switch (e.which) {
-        case 37: // left
-	    cameraLeft()
-            break;
-
-        case 38: // up
-	    cameraUp()
-            break;
-
-        case 39: // right
-	    cameraRight()
-            break;
-
-        case 40: // down
-	    cameraDown()
-            break;
-
-        default: return; // exit this handler for other keys
-	}
-	e.preventDefault(); // prevent the default action (scroll / move caret)
-    });
 }
 
 function poll() {
-    $.ajax({url: "status.json"}).done(updateStatus)
-    if (stop_motors && !block_set_motors) {
-	setMotors(0,0);
-	stop_motors = false
-    }
+    $.ajax({url: "status.json"}).done(updateStatus).fail(function (jqXHR, textStatus) { setTimeout(poll, 3000) })
 }
 
 function updateStatus(json) {
@@ -83,6 +56,29 @@ function updateStatus(json) {
     setTimeout(poll, 100)
 }
 
+function keydown(e) {
+    switch (e.which) {
+    case 37: // left
+	cameraLeft()
+        break;
+
+    case 38: // up
+	cameraUp()
+        break;
+
+    case 39: // right
+	cameraRight()
+        break;
+
+    case 40: // down
+	cameraDown()
+        break;
+
+    default: return; // exit this handler for other keys
+    }
+    e.preventDefault(); // prevent the default action (scroll / move caret)
+}
+
 function joystickTouchMove(e) {
     e.preventDefault()
     touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
@@ -98,7 +94,7 @@ function joystickMouseUp(e) {
     if (joystick_mouse_dragging) {
 	e.preventDefault()
 	joystick_mouse_dragging = false
-	stop_motors = true
+	setMotors(0,0)
     }
 }
 
@@ -133,24 +129,18 @@ function joystickDragTo(x, y) {
     if (right_motor > 400) right_motor = 400
     if (right_motor < -400) right_motor = -400
 
-    stop_motors = false
     setMotors(left_motor, right_motor)
 }
 
 function joystickTouchEnd(e) {
     e.preventDefault()
-    stop_motors = true
+    setMotors(0,0)
 }
 
 function setMotors(left, right) {
     $("#joystick").html("Motors: " + left + " " + right)
 
-    if (block_set_motors) return
-    block_set_motors = true
-
-    $.ajax({url: "motors/" + left + "," + right}).done(function () {
-	block_set_motors = false
-    })
+    $.ajax({url: "motors/" + left + "," + right})
 }
 
 function laserMouseDown(e) {
@@ -201,17 +191,12 @@ function laserTouchEnd(e) {
 }
 
 function setLaser(pan, tilt) {
-    if (block_set_laser) return
-    block_set_laser = true
-    
     if (!pan)  pan = 0;
     if (!tilt) tilt = 0;
     
     $("#laser").html("Laser: " + pan + " " + tilt)
     
-    $.ajax({url: "laser/" + pan + "," + tilt}).done(function () {
-	block_set_laser = false
-    })
+    $.ajax({url: "laser/" + pan + "," + tilt})
 }
 
 function setLaserPower() {
@@ -256,26 +241,23 @@ function cameraTouchStart(e) {
     }
 }
 
-function cameraUp() {
-    setCamera(camera_pan, camera_tilt + 10)
-}
-
-function cameraDown() {
-    setCamera(camera_pan, camera_tilt - 10)
-}
-
 function cameraLeft() {
-    setCamera(camera_pan + 10, camera_tilt)
+    cameraPanBy(10)
 }
 
 function cameraRight() {
-    setCamera(camera_pan - 10, camera_tilt)
+    cameraPanBy(-10)
+}
+
+function cameraUp() {
+    cameraTiltBy(10)
+}
+
+function cameraDown() {
+    cameraTiltBy(-10)
 }
 
 function setCamera(pan, tilt) {
-    if (block_set_camera) return
-    block_set_camera = true
-
     if (!pan)  pan = 0;
     if (!tilt) tilt = 0;
     
@@ -284,7 +266,24 @@ function setCamera(pan, tilt) {
 	camera_pan = c[0]
 	camera_tilt = c[1]
 	$("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
-	block_set_camera = false
+    })
+}
+
+function cameraPanBy(delta) {
+    if (!delta)  delta = 0;
+    
+    $.ajax({url: "cameraPanBy/" + delta}).done(function (json) {
+	camera_pan = JSON.parse(json)
+	$("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
+    })
+}
+
+function cameraTiltBy(delta) {
+    if (!delta)  delta = 0;
+    
+    $.ajax({url: "cameraTiltBy/" + delta}).done(function (json) {
+	camera_tilt = JSON.parse(json)
+	$("#cameraPos").html("Camera: " + camera_pan + " " + camera_tilt)
     })
 }
 
